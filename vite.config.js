@@ -1,5 +1,5 @@
-gimport { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+gimport { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 // https://vite.dev/config/
 export default defineConfig({
