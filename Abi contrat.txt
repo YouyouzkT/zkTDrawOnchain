@@ -1,0 +1,132 @@
+[
+	{
+		"inputs": [
+			{
+				"internalType": "string[]",
+				"name": "_participants",
+				"type": "string[]"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_numWinners",
+				"type": "uint256"
+			}
+		],
+		"name": "createAndDraw",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "lotteryId",
+				"type": "uint256"
+			}
+		],
+		"name": "LotteryCreated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_lotteryId",
+				"type": "uint256"
+			}
+		],
+		"name": "getParticipants",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_lotteryId",
+				"type": "uint256"
+			}
+		],
+		"name": "getWinners",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "lotteries",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "numWinners",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "drawn",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "lotteryCount",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]

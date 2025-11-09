@@ -1,0 +1,288 @@
+import React, { useState, useEffect } from "react";
+import { ethers } from "ethers";
+
+// Colle ici l’ABI complète de ton contrat
+const contractABI = [
+  {
+    "inputs": [
+      {
+        "internalType": "string[]",
+        "name": "_participants",
+        "type": "string[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_numWinners",
+        "type": "uint256"
+      }
+    ],
+    "name": "createAndDraw",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_lotteryId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getParticipants",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_lotteryId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getWinners",
+    "outputs": [
+      {
+        "internalType": "string[]",
+        "name": "",
+        "type": "string[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "lotteries",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "numWinners",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "drawn",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "lotteryCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+];
+
+const contractAddress = "0x7479bb7DEb005C9995ebd8654c4DFA1c57C83033";
+
+export default function App() {
+  const [provider, setProvider] = useState(null);
+  const [contract, setContract] = useState(null);
+  const [accounts, setAccounts] = useState([]);
+
+  const [participantsStr, setParticipantsStr] = useState("");
+  const [numWinners, setNumWinners] = useState("");
+  const [lotteryResult, setLotteryResult] = useState(null);
+
+  const [searchLotteryId, setSearchLotteryId] = useState("");
+  const [searchedLottery, setSearchedLottery] = useState(null);
+
+  useEffect(() => {
+    async function init() {
+      if (window.ethereum) {
+        try {
+          // Nouvelle syntaxe ethers v6
+          const prov = new ethers.BrowserProvider(window.ethereum);
+          setProvider(prov);
+          const accs = await prov.send("eth_requestAccounts", []);
+          setAccounts(accs);
+          const signer = await prov.getSigner();
+          const cont = new ethers.Contract(contractAddress, contractABI, signer);
+          setContract(cont);
+        } catch (err) {
+          alert("Erreur lors de la connexion à MetaMask : " + err.message);
+        }
+      } else {
+        alert("MetaMask non détecté");
+      }
+    }
+    init();
+  }, []);
+
+  const handleDraw = async () => {
+    if (!contract) return alert("Contrat non connecté");
+    if (!participantsStr.trim()) return alert("Liste participants vide");
+    if (!numWinners || isNaN(numWinners) || parseInt(numWinners) < 1)
+      return alert("Nombre de gagnants invalide");
+
+    try {
+      const participantsArray = participantsStr
+        .split(",")
+        .map((p) => p.trim())
+        .filter((p) => p.length > 0);
+
+      const tx = await contract.createAndDraw(participantsArray, BigInt(parseInt(numWinners)));
+      const receipt = await tx.wait();
+
+      const event = receipt.events.find(
+        (e) => e.event === "LotteryCreated" || e.event === "NewLotteryCreated"
+      );
+      let lotteryId = null;
+      if (event && event.args) {
+        lotteryId = event.args[0].toString();
+      } else {
+        lotteryId = "non détecté (adapter selon contrat)";
+      }
+
+      setLotteryResult({ lotteryId, participants: participantsArray, winners: [] });
+      alert("Tirage effectué, ID loterie : " + lotteryId);
+    } catch (err) {
+      alert("Erreur lors du tirage : " + err.message);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!contract) return alert("Contrat non connecté");
+    if (!searchLotteryId || isNaN(searchLotteryId)) return alert("ID loterie invalide");
+
+    try {
+      const id = BigInt(parseInt(searchLotteryId));
+      const participants = await contract.getParticipants(id);
+      const winners = await contract.getWinners(id);
+      setSearchedLottery({ id, participants, winners });
+    } catch (err) {
+      alert("Erreur lors de la récupération : " + err.message);
+      setSearchedLottery(null);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
+      <h1>Loterie Onchain Ternoa zkEVM</h1>
+
+      <p>
+        <b>Compte connecté :</b> {accounts[0] || "Aucun"}
+      </p>
+
+      <div>
+        <label>Liste des participants (séparés par virgule):</label>
+        <br />
+        <textarea
+          rows={4}
+          style={{ width: "100%" }}
+          value={participantsStr}
+          onChange={(e) => setParticipantsStr(e.target.value)}
+          placeholder="ex: eric, paul, jules, 0xabc123..."
+        />
+      </div>
+      <div style={{ marginTop: 10 }}>
+        <label>Nombre de gagnants :</label>
+        <br />
+        <input
+          type="number"
+          min="1"
+          value={numWinners}
+          onChange={(e) => setNumWinners(e.target.value)}
+          style={{ width: "100%" }}
+        />
+      </div>
+      <button onClick={handleDraw} style={{ marginTop: 15, padding: "10px", width: "100%" }}>
+        Lancer le tirage
+      </button>
+
+      {lotteryResult && (
+        <div style={{ marginTop: 20, padding: 10, border: "1px solid #ccc" }}>
+          <h3>Résultat du tirage #{lotteryResult.lotteryId}</h3>
+          <p>
+            <b>Participants:</b> {lotteryResult.participants.join(", ")}
+          </p>
+          <p>
+            <b>Gagnants:</b>{" "}
+            {lotteryResult.winners.length > 0
+              ? lotteryResult.winners.join(", ")
+              : "À récupérer via la fonction getWinners"}
+          </p>
+        </div>
+      )}
+
+      <hr style={{ margin: "30px 0" }} />
+
+      <div>
+        <label>Consulter une loterie par ID :</label>
+        <br />
+        <input
+          type="number"
+          min="0"
+          value={searchLotteryId}
+          onChange={(e) => setSearchLotteryId(e.target.value)}
+          style={{ width: "100%" }}
+          placeholder="Ex: 1"
+        />
+        <button onClick={handleSearch} style={{ marginTop: 10, padding: "10px", width: "100%" }}>
+          Consulter
+        </button>
+
+        {searchedLottery && (
+          <div style={{ marginTop: 20, border: "1px solid #aaa", padding: 10 }}>
+            <h3>Loterie #{searchedLottery.id.toString()}</h3>
+            <p>
+              <b>Participants:</b> {searchedLottery.participants.join(", ")}
+            </p>
+            <p>
+              <b>Gagnants:</b> {searchedLottery.winners.join(", ")}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
