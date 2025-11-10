@@ -253,7 +253,9 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
-      <h1>zkTDraw Onchain </h1>
+      <h1 style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)' }}>
+  zkTDraw Onchain
+</h1>
 
       <p>
         <b>Connected Wallet :</b> {accounts[0] || "Aucun"}
