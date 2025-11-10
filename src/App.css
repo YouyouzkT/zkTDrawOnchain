@@ -4,11 +4,7 @@
   padding: 2rem;
   text-align: center;
 }
-body {
-  background-image: url('/zkTDraw_ternoa_bg.png');
-  background-size: cover;
-  background-attachment: fixed;
-}
+
 .logo {
   height: 6em;
   padding: 1.5em;
