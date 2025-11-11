@@ -142,6 +142,7 @@ export default function App() {
   const [provider, setProvider] = useState(null);
   const [contract, setContract] = useState(null);
   const [accounts, setAccounts] = useState([]);
+  const [lotteryCount, setLotteryCount] = useState(null); // Nouveau state pour le compteur
 
   const [participantsStr, setParticipantsStr] = useState("");
   const [numWinners, setNumWinners] = useState("");
@@ -149,6 +150,16 @@ export default function App() {
 
   const [searchLotteryId, setSearchLotteryId] = useState("");
   const [searchedLottery, setSearchedLottery] = useState(null);
+
+  // Fonction pour récupérer le lotteryCount
+  const fetchLotteryCount = async (contractInstance) => {
+    try {
+      const count = await contractInstance.lotteryCount();
+      setLotteryCount(count.toString());
+    } catch (err) {
+      console.error("Erreur lors de la récupération du lotteryCount:", err);
+    }
+  };
 
   useEffect(() => {
     async function init() {
@@ -161,6 +172,9 @@ export default function App() {
           const signer = await prov.getSigner();
           const cont = new Contract(contractAddress, contractABI, signer);
           setContract(cont);
+          
+          // Récupérer le compteur initial
+          await fetchLotteryCount(cont);
         } catch (err) {
           alert("Erreur lors de la connexion à MetaMask : " + err.message);
         }
@@ -224,6 +238,10 @@ export default function App() {
         participants: participantsArray,
         winners: Array.from(winners),
       });
+      
+      // Mettre à jour le compteur après le tirage
+      await fetchLotteryCount(contract);
+      
       alert(
         `Tirage effectué, ID loterie : ${lotteryId}, Gagnants : ${Array.from(winners).join(", ")}`
       );
@@ -255,17 +273,30 @@ export default function App() {
   return (
     <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
       <h1 style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)' }}>
-  zkTDraw Onchain
-</h1>
+        zkTDraw Onchain
+      </h1>
 
       <p style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>
-        <b style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>Connected Wallet :</b> {accounts[0] || "Aucun"}
+        <b>Connected Wallet:</b> {accounts[0] || "Aucun"}
       </p>
+
+      {/* Nouvelle div pour afficher le nombre de loteries créées */}
+      <div style={{ 
+        marginBottom: 20, 
+        padding: 10, 
+        backgroundColor: 'rgba(0, 0, 0, 0.5)', 
+        borderRadius: 8,
+        border: '1px solid rgba(255, 255, 255, 0.2)'
+      }}>
+        <p style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold', margin: 0 }}>
+          <b>Total draws already created!!!    :</b> {lotteryCount !== null ? lotteryCount : "Loading..."}
+        </p>
+      </div>
 
       <div>
         <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>
-  Who is playing? (coma separated):
-</label>
+          Who is playing? (coma separated):
+        </label>
         <br />
         <textarea
           rows={4}
@@ -276,7 +307,7 @@ export default function App() {
         />
       </div>
       <div style={{ marginTop: 10 }}>
-        <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>How many winner? :</label>
+        <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>How many winner?:</label>
         <br />
         <input
           type="number"
@@ -294,7 +325,7 @@ export default function App() {
       </button>
 
       {lotteryResult && (
-        <div style={{ marginTop: 20, padding: 10, border: "1px solid #ccc" }}>
+        <div style={{ marginTop: 20, padding: 10, border: "1px solid #ccc", color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>
           <h3>Drawing result #{lotteryResult.lotteryId}</h3>
           <p>
             <b>Player list:</b> {lotteryResult.participants.join(", ")}
@@ -311,7 +342,7 @@ export default function App() {
       <hr style={{ margin: "30px 0" }} />
 
       <div>
-        <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>Check a draw ID :</label>
+        <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>Check a draw ID:</label>
         <br />
         <input
           type="number"
