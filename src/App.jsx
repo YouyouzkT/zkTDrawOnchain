@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BrowserProvider, Contract, Interface } from "ethers";
+import Footer from './components/Footer';
 
 // ABI complète
 const contractABI = [
@@ -257,12 +258,14 @@ export default function App() {
   zkTDraw Onchain
 </h1>
 
-      <p>
-        <b>Connected Wallet :</b> {accounts[0] || "Aucun"}
+      <p style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>
+        <b style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>Connected Wallet :</b> {accounts[0] || "Aucun"}
       </p>
 
       <div>
-        <label>Who is playing? (coma separated):</label>
+        <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>
+  Who is playing? (coma separated):
+</label>
         <br />
         <textarea
           rows={4}
@@ -273,7 +276,7 @@ export default function App() {
         />
       </div>
       <div style={{ marginTop: 10 }}>
-        <label>How many winner? :</label>
+        <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>How many winner? :</label>
         <br />
         <input
           type="number"
@@ -308,7 +311,7 @@ export default function App() {
       <hr style={{ margin: "30px 0" }} />
 
       <div>
-        <label>Check a draw ID :</label>
+        <label style={{ color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>Check a draw ID :</label>
         <br />
         <input
           type="number"
@@ -326,7 +329,7 @@ export default function App() {
         </button>
 
         {searchedLottery && (
-          <div style={{ marginTop: 20, border: "1px solid #aaa", padding: 10 }}>
+          <div style={{ marginTop: 20, border: "1px solid #aaa", padding: 10, color: 'white', textShadow: '2px 2px 4px rgba(0, 0, 0, 0.8)', fontWeight: 'bold' }}>
             <h3>Draw #{searchedLottery.id}</h3>
             <p>
               <b>Players:</b> {searchedLottery.participants.join(", ")}
@@ -337,6 +340,7 @@ export default function App() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
